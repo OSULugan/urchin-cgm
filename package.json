@@ -1,5 +1,5 @@
 {
-  "name": "urchin-cgm-second",
+  "name": "urchin-cgm-second-xdripios",
   "author": "Daniel Binkis",
   "version": "0.1.0",
   "keywords": ["pebble-app"],
@@ -10,8 +10,8 @@
     "uglify-js": "~2.7.3"
   },
   "pebble": {
-    "displayName": "Urchin CGM Second Hand",
-    "uuid": "ea361603-0373-4865-9824-8f52c65c6e08",
+    "displayName": "Urchin CGM Direct",
+    "uuid": "ea361603-0373-4865-9824-8f52c65c6e09",
     "projectType": "native",
     "sdkVersion": "3",
     "enableMultiJS": true,
