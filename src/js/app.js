@@ -294,8 +294,9 @@ function app(Pebble, c) {
 
       localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
       console.log('Preferences updated: ' + JSON.stringify(config));
+      var fetchData = config.dataSource !== 'xdrip' ? requestAndSendData : function() { return Promise.resolve(); };
       sendPreferences()
-        .then(requestAndSendData)
+        .then(fetchData)
         .then(function() {
           ga.track(data, c.CONFIG_GA_ID, getWatchInfo(), config);
         });
@@ -304,11 +305,16 @@ function app(Pebble, c) {
 
     Pebble.addEventListener('appmessage', function(e) {
       console.log('Received message from watch: ' + JSON.stringify(e.payload));
-      requestAndSendData();
+      // In xdrip mode data is pushed directly from the iOS app; ignore watch requests.
+      if (config.dataSource !== 'xdrip') {
+        requestAndSendData();
+      }
     });
 
-    // Send data immediately after the watchface is launched
-    requestAndSendData();
+    // Send data immediately after the watchface is launched (skip for xdrip mode).
+    if (config.dataSource !== 'xdrip') {
+      requestAndSendData();
+    }
   });
 
 }

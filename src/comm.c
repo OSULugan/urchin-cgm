@@ -2,6 +2,7 @@
 #include "config.h"
 #include "comm.h"
 #include "preferences.h"
+#include "xdrip_comm.h"
 
 static bool phone_contact = false;
 static bool update_in_progress;
@@ -97,15 +98,50 @@ static void request_update() {
 }
 
 static void in_received_handler(DictionaryIterator *received, void *context) {
-  phone_contact = true;
-  update_in_progress = false;
-
   int32_t msg_type;
   if (!get_int32(received, &msg_type, MESSAGE_KEY_msgType, true, 0)) {
+    phone_contact = true;
+    update_in_progress = false;
     request_state_callback(REQUEST_STATE_BAD_APP_MESSAGE, 0);
     schedule_update(BAD_APP_MESSAGE_RETRY_DELAY);
     return;
   }
+
+  if (msg_type == MSG_TYPE_XDRIP_CHUNK) {
+    // Data pushed directly from the iOS app — not part of the JS request/response
+    // cycle. Mark Bluetooth contact, cancel any pending timeout, but do NOT
+    // schedule the next JS poll request.
+    phone_contact = true;
+    update_in_progress = false;
+    clear_timer(&timeout_timer);
+
+    int32_t file_type_i, total_chunks_i, chunk_index_i;
+    Tuple *t_cd = dict_find(received, MESSAGE_KEY_xdripChunkData);
+
+    if (get_int32(received, &file_type_i, MESSAGE_KEY_xdripFileType, true, 0)
+        && get_int32(received, &total_chunks_i, MESSAGE_KEY_xdripTotalChunks, true, 0)
+        && get_int32(received, &chunk_index_i, MESSAGE_KEY_xdripChunkIndex, true, 0)
+        && t_cd && t_cd->type == TUPLE_BYTE_ARRAY) {
+
+      bool dispatched = xdrip_handle_chunk(
+        (uint8_t)file_type_i,
+        (uint16_t)total_chunks_i,
+        (uint16_t)chunk_index_i,
+        t_cd->value->data,
+        t_cd->length,
+        data_callback
+      );
+
+      if (dispatched) {
+        request_state_callback(REQUEST_STATE_SUCCESS, 0);
+      }
+    }
+    return;
+  }
+
+  // Normal JS request/response path
+  phone_contact = true;
+  update_in_progress = false;
 
   if (msg_type == MSG_TYPE_DATA) {
     static DataMessage d;

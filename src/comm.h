@@ -27,6 +27,7 @@ enum {
   MSG_TYPE_ERROR,
   MSG_TYPE_DATA,
   MSG_TYPE_PREFERENCES,
+  MSG_TYPE_XDRIP_CHUNK,
 };
 
 typedef enum {

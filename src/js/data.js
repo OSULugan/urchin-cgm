@@ -697,6 +697,9 @@ var data = function(c, maxSGVCount) {
   d.getSGVsDateDescending = function(config) {
     if (config.dataSource === 'dexcom') {
       return d.getShareSGVsDateDescending(config);
+    } else if (config.dataSource === 'xdrip') {
+      // Data is pushed directly from the iOS app via AppMessages; no network fetch needed.
+      return Promise.resolve([]);
     } else {
       return d.getNightscoutSGVsDateDescending(config);
     }

@@ -71,7 +71,12 @@
       "statusMinRecencyToShowMinutes": 27,
       "statusMaxAgeMinutes": 28,
       "statusRecencyFormat": 29,
-      "includeSeconds" : 30
+      "includeSeconds" : 30,
+
+      "xdripFileType": 31,
+      "xdripTotalChunks": 32,
+      "xdripChunkIndex": 33,
+      "xdripChunkData": 34
     },
     "resources": {
       "media": [
