@@ -143,6 +143,19 @@ var data = function(c, maxSGVCount) {
     });
   });
 
+  d.getIOBJSON = debounce(function(config) {
+    return d.getJSON(config.nightscout_url + '/api/v1/iob').then(function(iobData) {
+      if (iobData && !isNaN(parseFloat(iobData['iob']))) {
+        return { 
+          text: parseFloat(iobData['iob']).toFixed(1).toString() + ' U',
+          recency: 0,
+        };
+      } else {
+        return '-';
+      }
+    });
+  });
+
   d.getPebbleIOB = function(config) {
     // As of Nightscout 0.9.0-beta1, the /pebble endpoint will return either
     // Care Portal or devicestatus IOB depending on what's available.
@@ -154,7 +167,7 @@ var data = function(c, maxSGVCount) {
           recency: 0,
         };
       } else {
-        return '-';
+        return d.getIOBJSON(config);;
       }
     });
   };
@@ -679,6 +692,7 @@ var data = function(c, maxSGVCount) {
       'rawdata': d.getRawData,
       'rig-raw': d.getRigBatteryAndRawData,
       'basal': d.getActiveBasal,
+      'iob': d.getIOBJSON,
       'pebbleiob': d.getPebbleIOB,
       'pebbleiobandcob': d.getPebbleIOBAndCOB,
       'loop': d.getLoopStatus,
